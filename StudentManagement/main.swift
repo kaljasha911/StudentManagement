@@ -39,7 +39,6 @@ class Student {
 class StudentStore {
     private var students: [Int: Student] = [:]   // keyed by ID
     
-    // CRUD helpers
     func add(_ student: Student) -> Bool {
         guard students[student.id] == nil else { return false } // duplicate
         students[student.id] = student
@@ -80,7 +79,7 @@ func readInt(prompt: String) -> Int {
     while true {
         print(prompt, terminator: " ")
         if let str = readLine(), let val = Int(str) { return val }
-        print("⚠️  Invalid integer. Try again.")
+        print("Invalid integer. Try again.")
     }
 }
 
@@ -93,7 +92,15 @@ func readGrades(prompt: String) -> [Double] {
                 return doubles
             }
         }
-        print("⚠️  Enter space-separated numeric grades (e.g., 75 82.5 91).")
+        print("Enter space-separated numeric grades (e.g., 75 82.5 91).")
+    }
+}
+
+func readDouble(prompt: String) -> Double {
+    while true {
+        print(prompt, terminator: " ")
+        if let str = readLine(), let val = Double(str) { return val }
+        print("Invalid number. Try again.")
     }
 }
 
@@ -101,7 +108,7 @@ let store = StudentStore()
 
 while true {
     guard let choice = Menu.prompt() else {
-        print("⚠️  Please enter a number between 1 and 5.")
+        print("Please enter a number between 1 and 5.")
         continue
     }
     
@@ -115,9 +122,9 @@ while true {
         
         let student = Student(id: id, name: name, grades: grades)
         if store.add(student) {
-            print("✅ Student added successfully!")
+            print("Student added successfully!")
         } else {
-            print("⚠️  A student with that ID already exists.")
+            print("A student with that ID already exists.")
         }
         
     case .viewAll:
@@ -139,11 +146,11 @@ while true {
                 print("\(s.name) has no grades recorded.")
             }
         } else {
-            print("⚠️  Student ID \(id) not found.")
+            print("Student ID \(id) not found.")
         }
         
     case .passFail:
-        let threshold = Double(readInt(prompt: "Enter grade threshold:"))
+        let threshold = Double(readDouble(prompt: "Enter grade threshold:"))
         let passing = store.all().filter { $0.isPassing(threshold: threshold) }
         let failing = store.all().filter { !$0.isPassing(threshold: threshold) }
         
