@@ -10,6 +10,7 @@
 
 import Foundation
 
+// Student Class
 class Student {
     let id: Int
     let name: String
@@ -20,43 +21,49 @@ class Student {
         self.name = name
         self.grades = grades
     }
-    
-    func addGrades(_ newGrades: [Double]) {
-        grades.append(contentsOf: newGrades)
-    }
-    
+
+// Calculates the average grade. Returns nil if no grades are present.
     func averageGrade() -> Double? {
         guard !grades.isEmpty else { return nil }
         return grades.reduce(0, +) / Double(grades.count)
     }
-    
+
+// Determines if the student is passing based on the given threshold.
+// Returns false if no grades are present.
     func isPassing(threshold: Double) -> Bool {
         guard let avg = averageGrade() else { return false }
         return avg >= threshold
     }
 }
 
+// StudentStore Class
 class StudentStore {
-    private var students: [Int: Student] = [:]   // keyed by ID
-    
+    private var students: [Int: Student] = [:] // Keyed by student ID for quick lookup
+ 
+// Adds a new student to the store. Returns false if the ID already exists.
     func add(_ student: Student) -> Bool {
-        guard students[student.id] == nil else { return false } // duplicate
+        guard students[student.id] == nil else { return false } // Prevent duplicate
         students[student.id] = student
         return true
     }
     
+// Returns all students sorted by ID.
     func all() -> [Student] {
         students.values.sorted { $0.id < $1.id }
     }
     
+// Retrieves a student by their ID.
     func byID(_ id: Int) -> Student? {
         students[id]
     }
 }
 
+// Menu Enum
+
 enum Menu: Int, CaseIterable {
     case add       = 1, viewAll, calcAverage, passFail, exit
-    
+
+// Displays the menu and prompts the user for a choice.
     static func prompt() -> Menu? {
         print("""
         
@@ -75,6 +82,7 @@ enum Menu: Int, CaseIterable {
     }
 }
 
+// Reads an integer input from the user with validation.
 func readInt(prompt: String) -> Int {
     while true {
         print(prompt, terminator: " ")
@@ -83,6 +91,7 @@ func readInt(prompt: String) -> Int {
     }
 }
 
+// Reads a list of double grades from the user with validation.
 func readGrades(prompt: String) -> [Double] {
     while true {
         print(prompt, terminator: " ")
@@ -92,7 +101,7 @@ func readGrades(prompt: String) -> [Double] {
                 return doubles
             }
         }
-        print("Enter space-separated numeric grades (e.g., 75 82.5 91).")
+        print("Enter space-separated numeric grades (e.g., 52 82.7 99).")
     }
 }
 
@@ -116,8 +125,17 @@ while true {
         
     case .add:
         let id    = readInt(prompt: "Enter student ID:")
-        print("Enter student name:", terminator: " ")
-        let name  = readLine() ?? "Unknown"
+        
+// Ensure a non-empty name is provided.
+        var name: String
+        repeat{
+            print("Enter student name:", terminator: " ")
+            name = readLine() ?? ""
+            if name.isEmpty {
+                print("Name cannot be empty. Try again!")
+            }
+        } while name.isEmpty
+        
         let grades = readGrades(prompt: "Enter grades separated by spaces:")
         
         let student = Student(id: id, name: name, grades: grades)
@@ -160,8 +178,8 @@ while true {
                 print("None.")
             } else {
                 for s in group {
-                    let avg = s.averageGrade() ?? 0
-                    print("ID: \(s.id), Name: \(s.name), Average: \(String(format: "%.2f", avg))")
+                    let avgStr = s.averageGrade().map { String(format: "%.2f", $0) } ?? "N/A"
+                    print("ID: \(s.id), Name: \(s.name), Average: \(avgStr)")
                 }
             }
         }
@@ -169,7 +187,7 @@ while true {
         printGroup(title: "Failing Students", group: failing)
         
     case .exit:
-        print("Exiting the program. Goodbye!")
+        print("Exiting the management program. Goodbye!")
         exit(EXIT_SUCCESS)
     }
 }
