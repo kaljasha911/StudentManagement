@@ -14,7 +14,7 @@ import Foundation
 class Student {
     let id: Int
     let name: String
-    private(set) var grades: [Double]
+    private(set) var grades: [Double] // List of the student's grades; private(set) so only this class can modify
     
     init(id: Int, name: String, grades: [Double] = []) {
         self.id = id
@@ -36,13 +36,14 @@ class Student {
     }
 }
 
-// StudentStore Class
+// StudentStore Class - Manages a collection of `Student` instances, allowing addition and retrieval.
 class StudentStore {
     private var students: [Int: Student] = [:] // Keyed by student ID for quick lookup
  
 // Adds a new student to the store. Returns false if the ID already exists.
     func add(_ student: Student) -> Bool {
-        guard students[student.id] == nil else { return false } // Prevent duplicate
+        guard students[student.id] == nil else {
+            return false } // Prevent duplicate
         students[student.id] = student
         return true
     }
@@ -125,6 +126,11 @@ while true {
         
     case .add:
         let id    = readInt(prompt: "Enter student ID:")
+        // Check if student ID already exists
+                if store.byID(id) != nil {
+                    print("Error: A student with ID \(id) already exists.")
+                    continue
+                }
         
 // Ensure a non-empty name is provided.
         var name: String
