@@ -125,13 +125,24 @@ while true {
     switch choice {
         
     case .add:
-        let id    = readInt(prompt: "Enter student ID:")
-        // Check if student ID already exists
-                if store.byID(id) != nil {
-                    print("Error: A student with ID \(id) already exists.")
+        var id: Int
+                // Loop until a unique ID is provided or user cancels
+                while true {
+                    id = readInt(prompt: "Enter student ID (or -1 to cancel):")
+                    if id == -1 {
+                        print("Cancelled adding student.")
+                        break
+                    }
+                    if store.byID(id) == nil {
+                        break // Unique ID found, proceed
+                    }
+                    print("Error: A student with ID \(id) already exists. Try a different ID.")
+                }
+                
+                // If user cancelled, skip to next menu iteration
+                if id == -1 {
                     continue
                 }
-        
 // Ensure a non-empty name is provided.
         var name: String
         repeat{
@@ -162,19 +173,27 @@ while true {
         }
         
     case .calcAverage:
-        let id = readInt(prompt: "Enter student ID to calculate average grade:")
-        if let s = store.byID(id) {
-            if let avg = s.averageGrade() {
-                print("Average grade for \(s.name): \(String(format: "%.2f", avg))")
-            } else {
-                print("\(s.name) has no grades recorded.")
+            var id: Int
+            // Loop until a valid ID is provided or user cancels
+            while true {
+                id = readInt(prompt: "Enter student ID to calculate average grade (or -1 to cancel):")
+                if id == -1 {
+                    print("Cancelled calculating average grade.")
+                    break
+                }
+                if let s = store.byID(id) {
+                    if let avg = s.averageGrade() {
+                        print("Average grade for \(s.name): \(String(format: "%.2f", avg))")
+                    } else {
+                        print("\(s.name) has no grades recorded.")
+                    }
+                    break // Valid ID found, exit loop
+                }
+                print("Student ID \(id) not found. Try a different ID.")
             }
-        } else {
-            print("Student ID \(id) not found.")
-        }
         
     case .passFail:
-        let threshold = Double(readDouble(prompt: "Enter grade threshold:"))
+        let threshold = readDouble(prompt: "Enter grade threshold:")
         let passing = store.all().filter { $0.isPassing(threshold: threshold) }
         let failing = store.all().filter { !$0.isPassing(threshold: threshold) }
         
