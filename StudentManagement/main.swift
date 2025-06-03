@@ -60,7 +60,7 @@ class StudentStore {
 }
 
 // Menu Enum
-
+// Defines the main menu options for the CLI interface.
 enum Menu: Int, CaseIterable {
     case add       = 1, viewAll, calcAverage, passFail, exit
 
@@ -78,6 +78,7 @@ enum Menu: Int, CaseIterable {
         Enter your choice:
         """, terminator: " ")
         
+        // Read line, convert to Int, then map to Menu case
         return Int(readLine() ?? "")
             .flatMap(Menu.init(rawValue:))
     }
@@ -93,12 +94,15 @@ func readInt(prompt: String) -> Int {
 }
 
 // Reads a list of double grades from the user with validation.
+// Returns: An array of Doubles parsed from the input.
 func readGrades(prompt: String) -> [Double] {
     while true {
         print(prompt, terminator: " ")
         if let line = readLine() {
             let parts = line.split(separator: " ")
-            if let doubles = Optional(parts.compactMap { Double($0) }), doubles.count == parts.count {
+            let doubles = parts.compactMap { Double($0) }
+            // Ensure every token converted successfully
+            if doubles.count == parts.count {
                 return doubles
             }
         }
@@ -106,6 +110,7 @@ func readGrades(prompt: String) -> [Double] {
     }
 }
 
+// Reads and validates a Double from standard input.
 func readDouble(prompt: String) -> Double {
     while true {
         print(prompt, terminator: " ")
@@ -114,16 +119,18 @@ func readDouble(prompt: String) -> Double {
     }
 }
 
-let store = StudentStore()
+let store = StudentStore()  // Initialize the student storage
 
 while true {
+    // Display menu and get user selection
     guard let choice = Menu.prompt() else {
         print("Please enter a number between 1 and 5.")
         continue
     }
     
     switch choice {
-        
+      
+    // Case 1: Add a new student
     case .add:
         var id: Int
                 // Loop until a unique ID is provided or user cancels
@@ -143,7 +150,7 @@ while true {
                 if id == -1 {
                     continue
                 }
-// Ensure a non-empty name is provided.
+        // Ensure a non-empty name is provided.
         var name: String
         repeat{
             print("Enter student name:", terminator: " ")
@@ -153,15 +160,19 @@ while true {
             }
         } while name.isEmpty
         
+        // Read grades list from user
         let grades = readGrades(prompt: "Enter grades separated by spaces:")
         
+        // Create Student object and attempt to add
         let student = Student(id: id, name: name, grades: grades)
         if store.add(student) {
             print("Student added successfully!")
         } else {
+            // Should not occur due to prior uniqueness check, but included for safety
             print("A student with that ID already exists.")
         }
-        
+    
+    // Case 2: View all students currently in the system
     case .viewAll:
         print("\n--- Student List ---")
         if store.all().isEmpty {
@@ -172,6 +183,7 @@ while true {
             }
         }
         
+// Case 3: Calculate and display a student's average grade
     case .calcAverage:
             var id: Int
             // Loop until a valid ID is provided or user cancels
@@ -182,6 +194,7 @@ while true {
                     break
                 }
                 if let s = store.byID(id) {
+                    // Compute average if grades exist
                     if let avg = s.averageGrade() {
                         print("Average grade for \(s.name): \(String(format: "%.2f", avg))")
                     } else {
@@ -191,12 +204,14 @@ while true {
                 }
                 print("Student ID \(id) not found. Try a different ID.")
             }
-        
+    
+// Case 4: Display which students are passing or failing
     case .passFail:
         let threshold = readDouble(prompt: "Enter grade threshold:")
         let passing = store.all().filter { $0.isPassing(threshold: threshold) }
         let failing = store.all().filter { !$0.isPassing(threshold: threshold) }
         
+// Helper function to print a group of students with their averages
         func printGroup(title: String, group: [Student]) {
             print("\n--- \(title) ---")
             if group.isEmpty {
